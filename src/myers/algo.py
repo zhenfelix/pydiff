@@ -45,7 +45,10 @@ def diff(a, b, context=None, format=None):
          used to format the diff entries.  Otherwise they are returned as-is.
     """
     diff = _myers(a, b)
-
+    diff2 = _meyer2(a,b) 
+    # print(diff)
+    # print(diff2)
+    assert(diff == diff2)
     if context is not None:
         diff = list(_compact(diff, context))
 
@@ -78,6 +81,7 @@ def _myers(a, b):
 
             history = history[:]
             # get rid of the initial case x, y = (0,0)
+            # x, y could be out of range
             if 1 <= y <= len(b) and go_down:
                 history.append((INSERT, b[y - 1]))
             elif 1 <= x <= len(a):
@@ -94,6 +98,42 @@ def _myers(a, b):
             front[k] = x, history
 
     # TODO: is this possible to reach?
+    raise ValueError('Unable to compute diff')
+
+# class Record:
+#     self.entry = None 
+#     self.pre = None
+
+def _meyer2(a,b):
+    n, m = len(a), len(b)
+    sz = max((n+m)*2+1,5)
+    reach = [-1]*(sz)
+    reach[1] = 0
+    histories = [[] for _ in range(sz)]
+    for d in range(n+m+1):
+        for k in range(-d,d+1,2):
+            if k < -m or k > n: continue
+            go_down = k == -d or (k != d and reach[k-1] < reach[k+1])
+            if go_down:
+                reach[k] = reach[k+1]
+                histories[k] = histories[k+1].copy()
+            else:
+                reach[k] = reach[k-1]+1
+                histories[k] = histories[k-1].copy()
+            x = reach[k]
+            y = x-k 
+            if 1 <= y <= m and go_down:
+                histories[k].append((INSERT,b[y-1]))
+            elif 1 <= x <= n and not go_down:
+            # elif 1 <= x <= n:
+                histories[k].append((REMOVE,a[x-1]))
+            while x < n and y < m and a[x] == b[y]:
+                x += 1
+                y += 1
+                histories[k].append((KEEP,a[x-1]))
+            if x == n and y == m:
+                return histories[k]
+            reach[k] = x 
     raise ValueError('Unable to compute diff')
 
 

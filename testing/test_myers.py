@@ -1,13 +1,22 @@
 from __future__ import print_function
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
-import functools
+import functools, random
 import myers
 
 diff = functools.partial(myers.diff, format=True)
 
 
 class TestDiff(TestCase):
+    def test_diff_string(self):
+        for _ in range(100):
+            ss = "abcdef"
+            a = random.choices(ss,k=random.randint(0,100))
+            b = random.choices(ss,k=random.randint(0,100))
+            print(a,b)
+            diff(a,b)
+
+
     def test_diff(self):
         actual = diff(FILE_A, FILE_B)
         assert actual == DIFF
