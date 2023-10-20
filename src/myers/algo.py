@@ -64,8 +64,10 @@ def _myers(a, b):
 
     for d in range(0, len(a) + len(b) + 1):
         for k in range(-d, d + 1, 2):
+            # for k out of range [-len(b),len(a)], they will not contribute to the result of (len(b),len(a))
             go_down = k == -d or (k != d and front[k - 1][0] < front[k + 1][0])
-
+            # same as
+            # go_down = k == -d or (k != d and front[k - 1][0]+1 <= front[k + 1][0])
             if go_down:
                 old_x, history = front[k + 1]
                 x = old_x
@@ -75,7 +77,7 @@ def _myers(a, b):
             y = x - k
 
             history = history[:]
-
+            # get rid of the initial case x, y = (0,0)
             if 1 <= y <= len(b) and go_down:
                 history.append((INSERT, b[y - 1]))
             elif 1 <= x <= len(a):

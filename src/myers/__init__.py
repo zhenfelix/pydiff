@@ -1,3 +1,3 @@
 __version__ = "0.0.1"
-
-from .myers import diff, _main
+print("hello world")
+from .algo import diff, _main 
