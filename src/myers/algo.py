@@ -100,39 +100,50 @@ def _myers(a, b):
     # TODO: is this possible to reach?
     raise ValueError('Unable to compute diff')
 
-# class Record:
-#     self.entry = None 
-#     self.pre = None
+class Record:    
+    def __init__(self, entry = None) -> None:
+        self.entry = entry 
+        self.pre = None
+    def goback(self) -> []:
+        if not self.entry: return []
+        return [self.entry]+(self.pre.goback() if self.pre else [])
+    
 
 def _meyer2(a,b):
     n, m = len(a), len(b)
     sz = max((n+m)*2+1,5)
     reach = [-1]*(sz)
     reach[1] = 0
-    histories = [[] for _ in range(sz)]
+    histories = [Record() for _ in range(sz)]
     for d in range(n+m+1):
         for k in range(-d,d+1,2):
             if k < -m or k > n: continue
             go_down = k == -d or (k != d and reach[k-1] < reach[k+1])
             if go_down:
                 reach[k] = reach[k+1]
-                histories[k] = histories[k+1].copy()
+                histories[k] = histories[k+1]
             else:
                 reach[k] = reach[k-1]+1
-                histories[k] = histories[k-1].copy()
+                histories[k] = histories[k-1]
             x = reach[k]
             y = x-k 
             if 1 <= y <= m and go_down:
-                histories[k].append((INSERT,b[y-1]))
+                tmp = Record((INSERT,b[y-1]))
+                tmp.pre = histories[k]
+                histories[k] = tmp 
             elif 1 <= x <= n and not go_down:
             # elif 1 <= x <= n:
-                histories[k].append((REMOVE,a[x-1]))
+                tmp = Record((REMOVE,a[x-1]))
+                tmp.pre = histories[k]
+                histories[k] = tmp  
             while x < n and y < m and a[x] == b[y]:
                 x += 1
                 y += 1
-                histories[k].append((KEEP,a[x-1]))
+                tmp = Record((KEEP,a[x-1]))
+                tmp.pre = histories[k]
+                histories[k] = tmp 
             if x == n and y == m:
-                return histories[k]
+                return histories[k].goback()[::-1]
             reach[k] = x 
     raise ValueError('Unable to compute diff')
 
